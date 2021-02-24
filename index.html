@@ -41,7 +41,7 @@
             function selectedHistogram(d) {
                 data = d;
                 columns = d.columns;
-                maxValue = d3.reduce(d, (p, v) => Math.max(p,v.value) , 0)
+                maxValue = d3.reduce(d, (p, v) => Math.max(p,v.val) , 0)
 
                 dateSelector(columns);
                 updateSelect()
@@ -65,7 +65,9 @@
 
             function updateSelect(e) {
                 val = d3.select("select").node().value
-                fdata = d3.filter(data, d => d.columns == val)
+                xdata = d3.filter(data, d => d.columns == x).attr('id', 'x')
+                vardata = d3.filter(data, d => d.columns == val).attr('id', val)
+                fdata = xdata.concat(vardata)
                 updateChart(fdata)
             }
 
@@ -86,8 +88,8 @@
                 svgBind.enter()
                     .append('rect')
                     .attr('x', (d , i) => ind(i))
-                    .attr('y', d => y(maxValue - d.value))
-                    .attr('height', d => y(d.value))
+                    .attr('y', d => y(maxValue - d.val))
+                    .attr('height', d => y(d.val))
                     .attr('width', ind(1)*0.95)
                     .attr('fill', d => color(d.ind))
 
@@ -96,24 +98,24 @@
                     .attr('x', 0)
                     .attr('y', 0)
                     .attr('transform', 
-                          (d , i) => 'translate(' + ind(i+0.5) +
-                            ',' + y(maxValue - d.value - 5000)+'),' 
-                            + 'rotate(-90)')
+                          (d , i) => 'translate(' + ind(i+0.25) +
+                            ',' + y(maxValue - d.val )+'),' 
+                            + 'rotate(0)')
                     .text(d => d.ind);
             }
 
             var data_2, maxValue2;
             function allHistogram(d) {
                 data_2 = d;
-                maxValue2 = d3.reduce(d, (p, v) => Math.max(p,v.data1) , 0)
+                maxValue2 = d3.reduce(d, (p, v) => Math.max(p,v.data1) , 0) +10
                
                 Chart(data_2)
             }
 
             function Chart(data_2) {
                 svg =  d3.select("#all_histogram");
-                w = svg.node().width.baseVal.data1;
-                h = svg.node().height.baseVal.data1;
+                w = svg.node().width.baseVal.value;
+                h = svg.node().height.baseVal.value;
 
                 ind = d3.scaleLinear([0, data_2.length], [0, w])
                 y = d3.scaleLinear([0, maxValue2], [0,h])
@@ -137,9 +139,9 @@
                     .attr('x', 0)
                     .attr('y', 0)
                     .attr('transform', 
-                          (d , i) => 'translate(' + ind(i+0.5) +
-                            ',' + y(maxValue2 - d.data1)+'),' 
-                            + 'rotate(-90)')
+                          (d , i) => 'translate(' + ind(i+0.25) +
+                            ',' + y(maxValue2 - d.data1 -2)+'),' 
+                            + 'rotate(0)')
                     .text(d => d.x);
             }
 
