@@ -68,7 +68,13 @@
                 updateChart(data)
             }
 
+            function maxval(d) {
+                maxValue = d3.reduce(d, (p, v) => Math.max(p,v.val) , 0)
+            }
+
             function updateChart(data) {
+                maxval(d)
+
                 svg =  d3.select("#selected_histogram");
                 w = svg.node().width.baseVal.value;
                 h = svg.node().height.baseVal.value;
