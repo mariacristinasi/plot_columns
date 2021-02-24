@@ -65,10 +65,7 @@
 
             function updateSelect(e) {
                 val = d3.select("select").node().value
-                xdata = d3.filter(data, d => d.columns == x).attr('id', 'x')
-                vardata = d3.filter(data, d => d.columns == val).attr('id', val)
-                fdata = xdata.concat(vardata)
-                updateChart(fdata)
+                updateChart(data)
             }
 
             function updateChart(data) {
@@ -78,7 +75,7 @@
 
                 ind = d3.scaleLinear([0, data.length], [0, w])
                 y = d3.scaleLinear([0, maxValue], [0,h])
-                cat = new Set(d3.map(data, d => d.ind))
+                cat = new Set(d3.map(data, d => d.x))
                 color = d3.scaleOrdinal(cat, d3.schemeTableau10)
 
                 svgBind = svg.text("")
@@ -91,17 +88,17 @@
                     .attr('y', d => y(maxValue - d.val))
                     .attr('height', d => y(d.val))
                     .attr('width', ind(1)*0.95)
-                    .attr('fill', d => color(d.ind))
+                    .attr('fill', d => color(d.x))
 
                 svgBind.enter()
                     .append("text")
                     .attr('x', 0)
                     .attr('y', 0)
                     .attr('transform', 
-                          (d , i) => 'translate(' + ind(i+0.25) +
+                          (d , i) => 'translate(' + ind(i) +
                             ',' + y(maxValue - d.val )+'),' 
                             + 'rotate(0)')
-                    .text(d => d.ind);
+                    .text(d => d.x);
             }
 
             var data_2, maxValue2;
@@ -139,7 +136,7 @@
                     .attr('x', 0)
                     .attr('y', 0)
                     .attr('transform', 
-                          (d , i) => 'translate(' + ind(i+0.25) +
+                          (d , i) => 'translate(' + ind(i+0.3) +
                             ',' + y(maxValue2 - d.data1 -2)+'),' 
                             + 'rotate(0)')
                     .text(d => d.x);
