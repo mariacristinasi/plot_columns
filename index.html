@@ -72,8 +72,7 @@
                 svg =  d3.select("#selected_histogram");
                 w = svg.node().width.baseVal.value;
                 h = svg.node().height.baseVal.value;
-                maxValue = d3.reduce(d, (p, v) => Math.max(p,v.val) , 0)
-
+                
                 ind = d3.scaleLinear([0, data.length], [0, w])
                 y = d3.scaleLinear([0, maxValue], [0,h])
                 cat = new Set(d3.map(data, d => d.x))
