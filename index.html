@@ -1,1 +1,148 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Histograms</title>
+        <script src="https://d3js.org/d3.v6.min.js"></script>
+        <style>
+            svg {
+                background-color: rgb(243, 243, 87);
+            }
+            body {background-color: white;}
+            .normal {color: rgb(0, 0, 0)}
+            .other {color: rgb(11, 102, 11); font-weight: bold; font-size:20px}
+        </style>
+    </head>
 
+    <body>
+        <p style="font-family: Impact" class="other">
+            Histogram of selected column:
+            <br>
+        </p>
+
+        <div id="dateSelector"></div>
+        <br>
+        <svg id="selected_histogram" style="width:100%; height: 200px;"></svg>
+        
+    
+
+        <p style="font-family: Impact" class="other">
+            Histogram of all columns:
+            <br>
+        </p>
+
+        <svg id="all_histogram" style="width:100%; height: 200px;"></svg>
+        
+        <script>
+            csv_url = false ? "histogram-data.csv" : "https://raw.githubusercontent.com/mariacristinasi/plot_columns/main/histogram-data.csv"
+            d3.dsv(';', csv_url).then(selectedHistogram)
+            d3.dsv(';', csv_url).then(allHistogram)
+
+            var data, columns, maxValue;
+            function selectedHistogram(d) {
+                data = d;
+                columns = d.columns;
+                maxValue = d3.reduce(d, (p, v) => Math.max(p,v.value) , 0)
+
+                dateSelector(columns);
+                updateSelect()
+            }
+
+            function dateSelector(d) { 
+                htmlNode = d3.select("#dateSelector");
+                htmlNode.append("label")
+                .attr("for", "columns")
+                .attr("class", "normal")
+                .text("Select a column: ");
+                htmlNode.append("select")
+                .attr("id", "columns")
+                .on("change", d => updateSelect(d))
+                .selectAll("option")
+                .data(d).enter()
+                .append("option")
+                .attr("value", e => e)
+                .text(e => e);
+            }
+
+            function updateSelect(e) {
+                val = d3.select("select").node().value
+                fdata = d3.filter(data, d => d.columns == val)
+                updateChart(fdata)
+            }
+
+            function updateChart(data) {
+                svg =  d3.select("#selected_histogram");
+                w = svg.node().width.baseVal.value;
+                h = svg.node().height.baseVal.value;
+
+                ind = d3.scaleLinear([0, data.length], [0, w])
+                y = d3.scaleLinear([0, maxValue], [0,h])
+                cat = new Set(d3.map(data, d => d.ind))
+                color = d3.scaleOrdinal(cat, d3.schemeTableau10)
+
+                svgBind = svg.text("")
+                    .selectAll("rect")
+                    .data(data)
+
+                svgBind.enter()
+                    .append('rect')
+                    .attr('x', (d , i) => ind(i))
+                    .attr('y', d => y(maxValue - d.value))
+                    .attr('height', d => y(d.value))
+                    .attr('width', ind(1)*0.95)
+                    .attr('fill', d => color(d.ind))
+
+                svgBind.enter()
+                    .append("text")
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('transform', 
+                          (d , i) => 'translate(' + ind(i+0.5) +
+                            ',' + y(maxValue - d.value - 5000)+'),' 
+                            + 'rotate(-90)')
+                    .text(d => d.ind);
+            }
+
+            var data_2, maxValue2;
+            function allHistogram(d) {
+                data_2 = d;
+                maxValue2 = d3.reduce(d, (p, v) => Math.max(p,v.data1) , 0)
+               
+                Chart(data_2)
+            }
+
+            function Chart(data_2) {
+                svg =  d3.select("#all_histogram");
+                w = svg.node().width.baseVal.data1;
+                h = svg.node().height.baseVal.data1;
+
+                ind = d3.scaleLinear([0, data_2.length], [0, w])
+                y = d3.scaleLinear([0, maxValue2], [0,h])
+                cat = new Set(d3.map(data_2, d => d.x))
+                color = d3.scaleOrdinal(cat, d3.schemeTableau10)
+
+                svgBind = svg.text("")
+                    .selectAll("rect")
+                    .data(data_2)
+
+                svgBind.enter()
+                    .append('rect')
+                    .attr('x', (d , i) => ind(i))
+                    .attr('y', d => y(maxValue2 - d.data1))
+                    .attr('height', d => y(d.data1))
+                    .attr('width', ind(1)*0.95)
+                    .attr('fill', d => color(d.x))
+
+                svgBind.enter()
+                    .append("text")
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('transform', 
+                          (d , i) => 'translate(' + ind(i+0.5) +
+                            ',' + y(maxValue2 - d.data1)+'),' 
+                            + 'rotate(-90)')
+                    .text(d => d.x);
+            }
+
+        </script>
+
+        
