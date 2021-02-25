@@ -41,7 +41,9 @@
             function selectedHistogram(d) {
                 data = d;
                 columns = d.columns;
-                maxValue = d3.reduce(d, (p, v) => Math.max(p,v.val) , 0)
+                maxValue_data1 = d3.reduce(d, (p, v) => Math.max(p,v.data1) , 0)
+                maxValue_data2 = d3.reduce(d, (p, v) => Math.max(p,v.data2) , 0)
+                maxValue_data3 = d3.reduce(d, (p, v) => Math.max(p,v.data3) , 0)
                 
                 dateSelector(columns);
                 updateSelect()
@@ -60,17 +62,36 @@
                 .data(d).enter()
                 .append("option")
                 .attr("value", e => e)
-                .text(e => e);
+                .text(function(e){
+                    if (e != "x"){
+                        return (e => e)
+                    }
+                    else {
+                        return("-")
+                    }
+                    })
+                }
             }
 
             function updateSelect(e) {
                 val = d3.select("select").node().value
-                updateChart(data)
+
+                if (val == "data1"){
+                    maxValue=maxValue_data1
+                    updateChart(data)
+                }
+                else if (val == "data2"){
+                    maxValue=maxValue_data2
+                    updateChart(data)
+                }
+                else if (val == "data3"){
+                    maxValue=maxValue_data3
+                    updateChart(data)
+                }
             }
 
             function updateChart(data) {
-                maxValue = d3.reduce(d3.map(data, d => d), (p, v) => Math.max(p,v.val) , 0)
-
+                
                 svg =  d3.select("#selected_histogram");
                 w = svg.node().width.baseVal.value;
                 h = svg.node().height.baseVal.value;
