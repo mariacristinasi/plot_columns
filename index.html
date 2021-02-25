@@ -5,7 +5,7 @@
         <script src="https://d3js.org/d3.v6.min.js"></script>
         <style>
             svg {
-                background-color: rgb(243, 243, 87);
+                background-color: rgb(250, 250, 140);
             }
             body {background-color: white;}
             .normal {color: rgb(0, 0, 0)}
@@ -32,6 +32,10 @@
 
         <svg id="all_histogram" style="width:100%; height: 200px;"></svg>
         
+        <p style="font-family: calibri" class="normal">
+            Blue color bars are related to "data1", while red ones are "data2" values and green ones plot "data3".
+        </p>
+
         <script>
             csv_url = false ? "histogram-data.csv" : "https://raw.githubusercontent.com/mariacristinasi/plot_columns/main/histogram-data.csv"
             d3.dsv(';', csv_url).then(selectedHistogram)
@@ -54,7 +58,8 @@
                 htmlNode.append("label")
                 .attr("for", "columns")
                 .attr("class", "normal")
-                .text("Select a column: ");
+                .text("Select a column: ")
+                .style("font-family", "calibri");
                 htmlNode.append("select")
                 .attr("id", "columns")
                 .on("change", d => updateSelect(d))
@@ -64,13 +69,12 @@
                 .attr("value", e => e)
                 .text(function(e){
                     if (e != "x"){
-                        return (e => e)
+                        return (e)
                     }
                     else {
                         return("-")
                     }
-                    })
-                }
+                })
             }
 
             function updateSelect(e) {
@@ -127,7 +131,11 @@
             var data_2, maxValue2;
             function allHistogram(d) {
                 data_2 = d;
-                maxValue2 = d3.reduce(d, (p, v) => Math.max(p,v.data1) , 0) +10
+                maxValue_data1 = d3.reduce(d, (p, v) => Math.max(p,v.data1) , 0)
+                maxValue_data2 = d3.reduce(d, (p, v) => Math.max(p,v.data2) , 0)
+                maxValue_data3 = d3.reduce(d, (p, v) => Math.max(p,v.data3) , 0)
+                
+                maxValue2 = Math.max(maxValue_data1, maxValue_data2, maxValue_data3) +10
                
                 Chart(data_2)
             }
@@ -137,7 +145,7 @@
                 w = svg.node().width.baseVal.value;
                 h = svg.node().height.baseVal.value;
 
-                ind = d3.scaleLinear([0, data_2.length], [0, w])
+                ind = d3.scaleLinear([0, 3*(data_2.length)], [0, w])
                 y = d3.scaleLinear([0, maxValue2], [0,h])
                 cat = new Set(d3.map(data_2, d => d.x))
                 color = d3.scaleOrdinal(cat, d3.schemeTableau10)
@@ -152,17 +160,56 @@
                     .attr('y', d => y(maxValue2 - d.data1))
                     .attr('height', d => y(d.data1))
                     .attr('width', ind(1)*0.95)
-                    .attr('fill', d => color(d.x))
+                    .attr('fill', '#36D4DE')
 
                 svgBind.enter()
                     .append("text")
                     .attr('x', 0)
                     .attr('y', 0)
                     .attr('transform', 
-                          (d , i) => 'translate(' + ind(i+0.3) +
+                          (d , i) => 'translate(' + ind(i) +
                             ',' + y(maxValue2 - d.data1 -2)+'),' 
                             + 'rotate(0)')
-                    .text(d => d.x);
+                    .text(d => d.x)
+                    .style("font-size", ind(1)*0.33);
+
+                    svgBind.enter()
+                    .append('rect')
+                    .attr('x', (d , i) => ind(i+data_2.length))
+                    .attr('y', d => y(maxValue2 - d.data2))
+                    .attr('height', d => y(d.data2))
+                    .attr('width', ind(1)*0.95)
+                    .attr('fill', '#FF6C7C')
+
+                    svgBind.enter()
+                        .append("text")
+                        .attr('x', 0 + ind(data_2.length))
+                        .attr('y', 0)
+                        .attr('transform', 
+                            (d , i) => 'translate(' + ind(i) +
+                                ',' + y(maxValue2 - d.data2 -2)+'),' 
+                                + 'rotate(0)')
+                        .text(d => d.x)
+                        .style("font-size", ind(1)*0.33);
+
+                    svgBind.enter()
+                        .append('rect')
+                        .attr('x', (d , i) => ind(i+2*(data_2.length)))
+                        .attr('y', d => y(maxValue2 - d.data2))
+                        .attr('height', d => y(d.data2))
+                        .attr('width', ind(1)*0.95)
+                        .attr('fill', '#36DE66')
+
+                    svgBind.enter()
+                        .append("text")
+                        .attr('x', 0 + ind(2*(data_2.length)))
+                        .attr('y', 0)
+                        .attr('transform', 
+                            (d , i) => 'translate(' + ind(i) +
+                                ',' + y(maxValue2 - d.data2 -2)+'),' 
+                                + 'rotate(0)')
+                        .text(d => d.x)
+                        .style("font-size", ind(1)*0.33);
             }
 
         </script>
