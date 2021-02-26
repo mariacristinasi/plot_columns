@@ -49,6 +49,10 @@
                 maxValue_data2 = d3.reduce(d, (p, v) => Math.max(p,v.data2) , 0)
                 maxValue_data3 = d3.reduce(d, (p, v) => Math.max(p,v.data3) , 0)
                 
+                minValue_data1 = d3.reduce(d, (p, v) => Math.min(p,v.data1) , 0)
+                minValue_data2 = d3.reduce(d, (p, v) => Math.min(p,v.data2) , 0)
+                minValue_data3 = d3.reduce(d, (p, v) => Math.min(p,v.data3) , 0)
+                
                 dateSelector(columns);
                 updateSelect()
             }
@@ -81,27 +85,30 @@
                 val = d3.select("select").node().value
 
                 if (val == "data1"){
-                    maxValue=maxValue_data1
-                    updateChart(data)
+                    maxValue=maxValue_data1 +8
+                    minValue=Math.min(minValue_data1,0)-2
+                    updateChart_data1(data)
                 }
                 else if (val == "data2"){
-                    maxValue=maxValue_data2
-                    updateChart(data)
+                    maxValue=maxValue_data2 +8
+                    minValue=Math.min(minValue_data2,0)-2
+                    updateChart_data2(data)
                 }
                 else if (val == "data3"){
-                    maxValue=maxValue_data3
-                    updateChart(data)
+                    maxValue=maxValue_data3 +8
+                    minValue=Math.min(minValue_data3,0)-2
+                    updateChart_data3(data)
                 }
             }
 
-            function updateChart(data) {
+            function updateChart_data1(data) {
                 
                 svg =  d3.select("#selected_histogram");
                 w = svg.node().width.baseVal.value;
                 h = svg.node().height.baseVal.value;
                 
                 ind = d3.scaleLinear([0, data.length], [0, w])
-                y = d3.scaleLinear([0, maxValue], [0,h])
+                y = d3.scaleLinear([minValue, maxValue], [0,h])
                 cat = new Set(d3.map(data, d => d.x))
                 color = d3.scaleOrdinal(cat, d3.schemeTableau10)
 
@@ -112,8 +119,8 @@
                 svgBind.enter()
                     .append('rect')
                     .attr('x', (d , i) => ind(i))
-                    .attr('y', d => y(maxValue - d.val))
-                    .attr('height', d => y(d.val))
+                    .attr('y',  d => y(maxValue + minValue - Math.max(0, d.data1)))
+                    .attr('height', d => y(Math.abs(d.data1)+minValue))
                     .attr('width', ind(1)*0.95)
                     .attr('fill', d => color(d.x))
 
@@ -123,9 +130,80 @@
                     .attr('y', 0)
                     .attr('transform', 
                           (d , i) => 'translate(' + ind(i) +
-                            ',' + y(maxValue - d.val +5000)+'),' 
+                            ',' + y(maxValue + minValue - Math.max(0, d.data1) -2)+'),' 
                             + 'rotate(0)')
-                    .text(d => d.x);
+                    .text(d => d.x)
+                    .style("font-size", 15);
+            }
+
+            function updateChart_data2(data) {
+                
+                svg =  d3.select("#selected_histogram");
+                w = svg.node().width.baseVal.value;
+                h = svg.node().height.baseVal.value;
+                
+                ind = d3.scaleLinear([0, data.length], [0, w])
+                y = d3.scaleLinear([minValue, maxValue], [0,h])
+                cat = new Set(d3.map(data, d => d.x))
+                color = d3.scaleOrdinal(cat, d3.schemeTableau10)
+
+                svgBind = svg.text("")
+                    .selectAll("rect")
+                    .data(data)
+
+                svgBind.enter()
+                    .append('rect')
+                    .attr('x', (d , i) => ind(i))
+                    .attr('y', d => y(maxValue + minValue - Math.max(0, d.data2)))
+                    .attr('height', d => y(Math.abs(d.data2)+minValue))
+                    .attr('width', ind(1)*0.95)
+                    .attr('fill', d => color(d.x))
+
+                svgBind.enter()
+                    .append("text")
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('transform', 
+                        (d , i) => 'translate(' + ind(i) +
+                            ',' + y(maxValue + minValue - Math.max(0, d.data2) -2)+'),' 
+                            + 'rotate(0)')
+                    .text(d => d.x)
+                    .style("font-size", 15);
+            }
+
+            function updateChart_data3(data) {
+                
+                svg =  d3.select("#selected_histogram");
+                w = svg.node().width.baseVal.value;
+                h = svg.node().height.baseVal.value;
+                
+                ind = d3.scaleLinear([0, data.length], [0, w])
+                y = d3.scaleLinear([minValue, maxValue], [0,h])
+                cat = new Set(d3.map(data, d => d.x))
+                color = d3.scaleOrdinal(cat, d3.schemeTableau10)
+
+                svgBind = svg.text("")
+                    .selectAll("rect")
+                    .data(data)
+
+                    svgBind.enter()
+                        .append('rect')
+                        .attr('x', (d , i) => ind(i))
+                        .attr('y', d => y(maxValue + minValue - Math.max(0, d.data3)))
+                        .attr('height', d => y(Math.abs(d.data3)+minValue))
+                        .attr('width', ind(1)*0.95)
+                        .attr('fill', d => color(d.x))
+
+                    svgBind.enter()
+                        .append("text")
+                        .attr('x', 0)
+                        .attr('y', 0)
+                        .attr('transform', 
+                            (d , i) => 'translate(' + ind(i) +
+                                ',' + y(maxValue + minValue - Math.max(0, d.data3) -2) +'),' 
+                                + 'rotate(0)')
+                        .text(d => d.x)
+                        .style("font-size", 15);
             }
 
             var data_2, maxValue2;
@@ -135,7 +213,13 @@
                 maxValue_data2 = d3.reduce(d, (p, v) => Math.max(p,v.data2) , 0)
                 maxValue_data3 = d3.reduce(d, (p, v) => Math.max(p,v.data3) , 0)
                 
-                maxValue2 = Math.max(maxValue_data1, maxValue_data2, maxValue_data3) +10
+                maxValue2 = Math.max(maxValue_data1, maxValue_data2, maxValue_data3) +12
+                
+                minValue_data1 = d3.reduce(d, (p, v) => Math.min(p,v.data1) , 0)
+                minValue_data2 = d3.reduce(d, (p, v) => Math.min(p,v.data2) , 0)
+                minValue_data3 = d3.reduce(d, (p, v) => Math.min(p,v.data3) , 0)
+                
+                minValue2 = Math.min(0, minValue_data1, minValue_data2, minValue_data3)-2
                
                 Chart(data_2)
             }
@@ -146,7 +230,7 @@
                 h = svg.node().height.baseVal.value;
 
                 ind = d3.scaleLinear([0, 3*(data_2.length)], [0, w])
-                y = d3.scaleLinear([0, maxValue2], [0,h])
+                y = d3.scaleLinear([minValue2, maxValue2], [0,h])
                 cat = new Set(d3.map(data_2, d => d.x))
                 color = d3.scaleOrdinal(cat, d3.schemeTableau10)
 
@@ -157,8 +241,8 @@
                 svgBind.enter()
                     .append('rect')
                     .attr('x', (d , i) => ind(i))
-                    .attr('y', d => y(maxValue2 - d.data1))
-                    .attr('height', d => y(d.data1))
+                    .attr('y',  d => y(maxValue2 + minValue2 - Math.max(0, d.data1)))
+                    .attr('height', d => y(Math.abs(d.data1)+minValue2))
                     .attr('width', ind(1)*0.95)
                     .attr('fill', '#36D4DE')
 
@@ -168,7 +252,7 @@
                     .attr('y', 0)
                     .attr('transform', 
                           (d , i) => 'translate(' + ind(i) +
-                            ',' + y(maxValue2 - d.data1 -2)+'),' 
+                            ',' + y(maxValue2 + minValue2 - Math.max(0, d.data1) -4)+'),' 
                             + 'rotate(0)')
                     .text(d => d.x)
                     .style("font-size", ind(1)*0.33);
@@ -176,8 +260,8 @@
                     svgBind.enter()
                     .append('rect')
                     .attr('x', (d , i) => ind(i+data_2.length))
-                    .attr('y', d => y(maxValue2 - d.data2))
-                    .attr('height', d => y(d.data2))
+                    .attr('y', d => y(maxValue2 + minValue2 - Math.max(0, d.data2)))
+                    .attr('height', d => y(Math.abs(d.data2)+minValue2))
                     .attr('width', ind(1)*0.95)
                     .attr('fill', '#FF6C7C')
 
@@ -187,7 +271,7 @@
                         .attr('y', 0)
                         .attr('transform', 
                             (d , i) => 'translate(' + ind(i) +
-                                ',' + y(maxValue2 - d.data2 -2)+'),' 
+                                ',' + y(maxValue2 + minValue2 - Math.max(0, d.data2) -4)+'),' 
                                 + 'rotate(0)')
                         .text(d => d.x)
                         .style("font-size", ind(1)*0.33);
@@ -195,8 +279,8 @@
                     svgBind.enter()
                         .append('rect')
                         .attr('x', (d , i) => ind(i+2*(data_2.length)))
-                        .attr('y', d => y(maxValue2 - d.data2))
-                        .attr('height', d => y(d.data2))
+                        .attr('y', d => y(maxValue2 + minValue2 - Math.max(0, d.data3)))
+                        .attr('height', d => y(Math.abs(d.data3)+minValue2))
                         .attr('width', ind(1)*0.95)
                         .attr('fill', '#36DE66')
 
@@ -206,10 +290,11 @@
                         .attr('y', 0)
                         .attr('transform', 
                             (d , i) => 'translate(' + ind(i) +
-                                ',' + y(maxValue2 - d.data2 -2)+'),' 
+                                ',' + y(maxValue2 + minValue2 - Math.max(0, d.data3) -4) +'),' 
                                 + 'rotate(0)')
                         .text(d => d.x)
                         .style("font-size", ind(1)*0.33);
+
             }
 
         </script>
